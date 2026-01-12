@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketAttachment> TicketAttachments => Set<TicketAttachment>();
     public DbSet<EmailSettings> EmailSettings => Set<EmailSettings>();
+    public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -51,5 +52,17 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(h => h.UsuarioId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Notificacion>()
+            .HasOne(n => n.Usuario)
+            .WithMany()
+            .HasForeignKey(n => n.UsuarioId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Notificacion>()
+            .HasOne(n => n.Ticket)
+            .WithMany()
+            .HasForeignKey(n => n.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

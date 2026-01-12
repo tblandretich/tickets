@@ -115,14 +115,64 @@
                 <ul class="list-group list-group-flush">
                     @foreach (var a in Model.Adjuntos)
                     {
+                        var isImage = a.ContentType?.StartsWith("image/") == true;
+                        var isPdf = a.ContentType == "application/pdf";
+                        var canPreview = isImage || isPdf;
+                        var fileUrl = $"/Tickets/DownloadAttachment?id={a.Id}";
+                        
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @a.FileName
-                            <span class="badge bg-secondary">@(a.SizeBytes / 1024) KB</span>
+                            <div class="d-flex align-items-center">
+                                @if (isImage)
+                                {
+                                    <span class="me-2">🖼️</span>
+                                }
+                                else if (isPdf)
+                                {
+                                    <span class="me-2">📄</span>
+                                }
+                                else
+                                {
+                                    <span class="me-2">📁</span>
+                                }
+                                <span>@a.FileName</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-secondary me-2">@(a.SizeBytes / 1024) KB</span>
+                                @if (canPreview)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                            onclick="previewFile('@fileUrl', '@a.ContentType', '@a.FileName')">
+                                        👁️ Ver
+                                    </button>
+                                }
+                                <a href="@fileUrl" class="btn btn-sm btn-outline-success" download="@a.FileName">
+                                    ⬇️ Descargar
+                                </a>
+                            </div>
                         </li>
                     }
                 </ul>
             </div>
         }
+
+        <!-- Modal de Previsualización -->
+        <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="previewModalLabel">📎 Previsualización</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-center" style="max-height:70vh;overflow:auto;">
+                        <div id="previewContent"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" id="previewDownloadBtn" class="btn btn-success" download>⬇️ Descargar</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Barra de Progreso del Estado -->
         <div class="card mb-4">
@@ -365,6 +415,27 @@ function toggleTiempoEstimado() {
     div.style.display = select.value === '2' ? 'block' : 'none';
 }
 document.addEventListener('DOMContentLoaded', toggleTiempoEstimado);
+
+function previewFile(url, contentType, fileName) {
+    const content = document.getElementById('previewContent');
+    const downloadBtn = document.getElementById('previewDownloadBtn');
+    const modalTitle = document.getElementById('previewModalLabel');
+    
+    downloadBtn.href = url;
+    downloadBtn.download = fileName;
+    modalTitle.textContent = '📎 ' + fileName;
+    
+    if (contentType.startsWith('image/')) {
+        content.innerHTML = `<img src="${url}" class="img-fluid" style="max-height:65vh;" alt="${fileName}">`;
+    } else if (contentType === 'application/pdf') {
+        content.innerHTML = `<iframe src="${url}" style="width:100%;height:65vh;border:none;"></iframe>`;
+    } else {
+        content.innerHTML = `<p class="text-muted">No se puede previsualizar este tipo de archivo.</p>`;
+    }
+    
+    var modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+}
 </script>
 }
 
@@ -439,3 +510,5 @@ document.addEventListener('DOMContentLoaded', toggleTiempoEstimado);
         _ => tipo.ToString()
     };
 }
+
+

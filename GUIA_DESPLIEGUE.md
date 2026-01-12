@@ -83,7 +83,75 @@ icacls "C:\inetpub\wwwroot\TicketsAndretich\App_Data" /grant "IIS_IUSRS:(OI)(CI)
 
 ---
 
-## 🌐 Opción 2: Subir a GitHub
+## ☁️ Opción 2: Azure App Service (Hosting en la nube)
+
+Azure es la nube de Microsoft, ideal para ASP.NET Core. Tiene un **tier gratuito** limitado.
+
+### Paso 1: Crear cuenta de Azure
+1. Ir a: https://azure.microsoft.com/free
+2. Crear cuenta (incluye $200 USD de crédito gratis por 30 días)
+3. Necesitarás una tarjeta de crédito (no se cobra en tier gratuito)
+
+### Paso 2: Crear Azure SQL Database
+1. En Azure Portal (portal.azure.com) → "Crear un recurso"
+2. Buscar "SQL Database" → Crear
+3. Configurar:
+   - **Grupo de recursos**: Crear nuevo → `tickets-rg`
+   - **Nombre base de datos**: `TicketsAndretichDB`
+   - **Servidor**: Crear nuevo
+     - Nombre: `tickets-server-tuusuario`
+     - Autenticación SQL: usuario `tickets_admin`, contraseña segura
+   - **Proceso**: Seleccionar **Básico** ($5/mes) o **Serverless** (pago por uso)
+4. En "Redes" → Permitir acceso a servicios de Azure
+5. Crear y esperar
+
+### Paso 3: Crear App Service
+1. Azure Portal → "Crear un recurso" → "App Service"
+2. Configurar:
+   - **Grupo de recursos**: `tickets-rg` (el mismo)
+   - **Nombre**: `tickets-andretich` (será tu URL: tickets-andretich.azurewebsites.net)
+   - **Publicar**: Código
+   - **Runtime stack**: .NET 8 (LTS)
+   - **Sistema operativo**: Windows
+   - **Región**: La más cercana (Brazil South, East US)
+   - **Plan de precios**: F1 (Gratis) o B1 ($13/mes)
+3. Crear
+
+### Paso 4: Configurar Connection String
+1. Ir a tu App Service → "Configuración" → "Cadenas de conexión"
+2. Agregar nueva:
+   - **Nombre**: `DefaultConnection`
+   - **Valor**: (obtener de Azure SQL → Cadenas de conexión)
+   ```
+   Server=tcp:tickets-server.database.windows.net,1433;Database=TicketsAndretichDB;User ID=tickets_admin;Password=TU_PASSWORD;Encrypt=true;
+   ```
+   - **Tipo**: SQLAzure
+3. Guardar
+
+### Paso 5: Deploy desde GitHub (automático)
+1. En tu App Service → "Centro de implementación"
+2. **Origen**: GitHub
+3. Autorizar con tu cuenta GitHub
+4. Seleccionar:
+   - **Organización**: tblandretich
+   - **Repositorio**: tickets
+   - **Rama**: main
+5. Guardar → Azure creará un GitHub Action automáticamente
+
+### Paso 6: Ejecutar migraciones
+1. Opción A: SSH desde Azure Portal
+   ```bash
+   cd site/wwwroot
+   dotnet TicketsAndretich.Web.dll database update
+   ```
+2. Opción B: Ya se aplican automáticamente al iniciar (EF Core)
+
+### Paso 7: Acceder
+Tu aplicación estará en: `https://tickets-andretich.azurewebsites.net`
+
+---
+
+## 🌐 Opción 3: Subir código a GitHub (Backup/Control de versiones)
 
 ### Paso 1: Instalar Git
 1. Descargar de: https://git-scm.com/downloads

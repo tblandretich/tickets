@@ -29,6 +29,7 @@ public class TicketsController : Controller
     public async Task<IActionResult> Index()
     {
         var currentUserId = _userManager.GetUserId(User);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
         var isAdmin = User.IsInRole("Admin");
 
         var query = _db.Tickets
@@ -43,10 +44,29 @@ public class TicketsController : Controller
             query = query.Where(t =>
                 t.CreadorUserId == currentUserId ||
                 t.AsignadoUserId == currentUserId ||
-                (t.EnviarATodoElDepartamento && t.DepartamentoDestinoId == _db.Users.Where(u => u.Id == currentUserId).Select(u => u.DepartmentId).FirstOrDefault()));
+                (t.EnviarATodoElDepartamento && t.DepartamentoDestinoId == currentUser!.DepartmentId));
         }
 
-        return View(await query.ToListAsync());
+        var allTickets = await query.ToListAsync();
+
+        // Separar tickets
+        var misTickets = allTickets.Where(t => 
+            t.AsignadoUserId == currentUserId || 
+            t.CreadorUserId == currentUserId).ToList();
+        
+        var ticketsDepartamento = allTickets.Where(t => 
+            t.AsignadoUserId != currentUserId && 
+            t.CreadorUserId != currentUserId &&
+            t.EnviarATodoElDepartamento && 
+            t.DepartamentoDestinoId == currentUser?.DepartmentId).ToList();
+
+        ViewBag.MisTickets = misTickets.Where(t => t.Estado != EstadoTicket.Cerrado).ToList();
+        ViewBag.MisTicketsCerrados = misTickets.Where(t => t.Estado == EstadoTicket.Cerrado).ToList();
+        ViewBag.TicketsDepartamento = ticketsDepartamento.Where(t => t.Estado != EstadoTicket.Cerrado).ToList();
+        ViewBag.TicketsDepartamentoCerrados = ticketsDepartamento.Where(t => t.Estado == EstadoTicket.Cerrado).ToList();
+        ViewBag.IsAdmin = isAdmin;
+
+        return View(allTickets);
     }
 
     public async Task<IActionResult> Create()
@@ -137,6 +157,10 @@ public class TicketsController : Controller
         foreach (var r in recipients)
             await _emailSender.SendEmailAsync(r, subject, body);
 
+        // Crear notificaciones en el sistema
+        await NotificarInteresados(ticket.Id, TipoNotificacion.NuevoTicket, 
+            $"Nuevo ticket #{ticket.Id}: {ticket.Asunto}", userId);
+
         TempData["Success"] = "Ticket creado y notificaciones enviadas.";
         return RedirectToAction(nameof(Index));
     }
@@ -158,6 +182,23 @@ public class TicketsController : Controller
         ViewBag.Departments = new SelectList(await _db.Departments.OrderBy(d => d.Name).ToListAsync(), "Id", "Name");
         ViewBag.Users = new SelectList(await _db.Users.OrderBy(u => u.Email!).ToListAsync(), "Id", "Email");
         return View(t);
+    }
+
+    public async Task<IActionResult> DownloadAttachment(int id)
+    {
+        var attachment = await _db.TicketAttachments.FindAsync(id);
+        if (attachment == null) return NotFound();
+
+        var stream = await _storage.OpenReadAsync(attachment.StoragePath);
+        if (stream == null) return NotFound();
+
+        // Para imágenes y PDFs, permitir visualización inline
+        var contentDisposition = attachment.ContentType?.StartsWith("image/") == true || 
+                                  attachment.ContentType == "application/pdf" 
+            ? "inline" : "attachment";
+
+        Response.Headers["Content-Disposition"] = $"{contentDisposition}; filename=\"{attachment.FileName}\"";
+        return File(stream, attachment.ContentType ?? "application/octet-stream");
     }
 
     // --------- Acciones de Gestión ---------
@@ -211,6 +252,10 @@ public class TicketsController : Controller
 
             await _emailSender.SendEmailAsync(ticket.Creator.Email, subject, body);
         }
+
+        // Crear notificaciones en el sistema
+        await NotificarInteresados(id, TipoNotificacion.CambioEstado, 
+            $"Ticket #{id} cambió a {nuevoEstado}", userId);
 
         TempData["Success"] = $"Estado cambiado a {nuevoEstado}.";
         return RedirectToAction(nameof(Details), new { id });
@@ -420,6 +465,98 @@ public class TicketsController : Controller
         }
 
         return recipients;
+    }
+
+    // --------- Notificaciones ---------
+
+    [HttpGet]
+    public async Task<IActionResult> GetNotificaciones()
+    {
+        var userId = _userManager.GetUserId(User);
+        var notificaciones = await _db.Notificaciones
+            .Include(n => n.Ticket)
+            .Where(n => n.UsuarioId == userId && !n.Leida)
+            .OrderByDescending(n => n.FechaCreacion)
+            .Take(10)
+            .Select(n => new {
+                n.Id,
+                n.TicketId,
+                n.Mensaje,
+                Tipo = n.Tipo.ToString(),
+                Fecha = n.FechaCreacion.ToLocalTime().ToString("dd/MM HH:mm"),
+                TicketAsunto = n.Ticket != null ? n.Ticket.Asunto : ""
+            })
+            .ToListAsync();
+
+        return Json(new { count = notificaciones.Count, items = notificaciones });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MarcarNotificacionLeida(int id)
+    {
+        var userId = _userManager.GetUserId(User);
+        var notif = await _db.Notificaciones.FirstOrDefaultAsync(n => n.Id == id && n.UsuarioId == userId);
+        if (notif != null)
+        {
+            notif.Leida = true;
+            await _db.SaveChangesAsync();
+        }
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MarcarTodasLeidas()
+    {
+        var userId = _userManager.GetUserId(User);
+        var notifs = await _db.Notificaciones.Where(n => n.UsuarioId == userId && !n.Leida).ToListAsync();
+        foreach (var n in notifs) n.Leida = true;
+        await _db.SaveChangesAsync();
+        return Ok();
+    }
+
+    private async Task CrearNotificacion(int ticketId, string usuarioDestinoId, TipoNotificacion tipo, string mensaje)
+    {
+        var notif = new Notificacion
+        {
+            TicketId = ticketId,
+            UsuarioId = usuarioDestinoId,
+            Tipo = tipo,
+            Mensaje = mensaje,
+            FechaCreacion = DateTimeOffset.UtcNow
+        };
+        _db.Notificaciones.Add(notif);
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task NotificarInteresados(int ticketId, TipoNotificacion tipo, string mensaje, string? excluirUserId = null)
+    {
+        var ticket = await _db.Tickets.FindAsync(ticketId);
+        if (ticket == null) return;
+
+        var usuariosNotificar = new List<string>();
+
+        // Notificar al asignado
+        if (!string.IsNullOrEmpty(ticket.AsignadoUserId) && ticket.AsignadoUserId != excluirUserId)
+            usuariosNotificar.Add(ticket.AsignadoUserId);
+
+        // Notificar al creador
+        if (!string.IsNullOrEmpty(ticket.CreadorUserId) && ticket.CreadorUserId != excluirUserId)
+            usuariosNotificar.Add(ticket.CreadorUserId);
+
+        // Si es para todo el departamento, notificar a todos los del depto
+        if (ticket.EnviarATodoElDepartamento && ticket.DepartamentoDestinoId > 0)
+        {
+            var usersDepto = await _db.Users
+                .Where(u => u.DepartmentId == ticket.DepartamentoDestinoId && u.Id != excluirUserId)
+                .Select(u => u.Id)
+                .ToListAsync();
+            usuariosNotificar.AddRange(usersDepto);
+        }
+
+        foreach (var userId in usuariosNotificar.Distinct())
+        {
+            await CrearNotificacion(ticketId, userId, tipo, mensaje);
+        }
     }
 }
 
