@@ -1,0 +1,182 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Dashboard</h2>
+</div>
+
+<!-- Tarjetas de estadísticas -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="stat-card stat-nuevos">
+            <div class="stat-icon">📄</div>
+            <div class="stat-label">Nuevos</div>
+            <div class="stat-value">@ViewBag.Nuevos</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="stat-card stat-proceso">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-label">En Proceso</div>
+            <div class="stat-value">@ViewBag.EnProceso</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="stat-card stat-espera">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">En Espera</div>
+            <div class="stat-value">@ViewBag.EnEspera</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="stat-card stat-cerrados">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Cerrados</div>
+            <div class="stat-value">@ViewBag.Cerrados</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="stat-card stat-criticos">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-label">Críticos</div>
+            <div class="stat-value">@ViewBag.Criticos</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="stat-card stat-tiempo">
+            <div class="stat-icon">🕒</div>
+            <div class="stat-label">Tiempo Prom.</div>
+            <div class="stat-value">@(ViewBag.PromedioHoras == 0 ? "N/D" : $"{ViewBag.PromedioHoras:F1} hrs")</div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="row g-4">
+    <!-- Gráfico Dona - Tickets por Estado -->
+    <div class="col-md-4">
+        <div class="chart-card">
+            <h5 class="chart-title">Tickets por Estado</h5>
+            <div class="chart-container">
+                <canvas id="chartEstado"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Barras - Tickets por Prioridad -->
+    <div class="col-md-4">
+        <div class="chart-card">
+            <h5 class="chart-title">Tickets por Prioridad</h5>
+            <div class="chart-container">
+                <canvas id="chartPrioridad"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Línea - Tendencia -->
+    <div class="col-md-4">
+        <div class="chart-card">
+            <h5 class="chart-title">Tendencia (Últimos 12 días)</h5>
+            <div class="chart-container">
+                <canvas id="chartTendencia"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    // Datos desde el servidor
+    const estadoLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.EstadoLabels));
+    const estadoData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.EstadoData));
+    const prioridadLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PrioridadLabels));
+    const prioridadData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PrioridadData));
+    const tendenciaLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.TendenciaLabels));
+    const tendenciaCreados = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.TendenciaCreados));
+    const tendenciaCerrados = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.TendenciaCerrados));
+
+    // Gráfico Dona - Estados
+    new Chart(document.getElementById('chartEstado'), {
+        type: 'doughnut',
+        data: {
+            labels: estadoLabels,
+            datasets: [{
+                data: estadoData,
+                backgroundColor: ['#1B5E20', '#0D47A1', '#E65100', '#424242'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 15, usePointStyle: true }
+                }
+            }
+        }
+    });
+
+    // Gráfico Barras - Prioridad
+    new Chart(document.getElementById('chartPrioridad'), {
+        type: 'bar',
+        data: {
+            labels: prioridadLabels,
+            datasets: [{
+                label: 'Tickets',
+                data: prioridadData,
+                backgroundColor: ['#1B5E20', '#E65100', '#B71C1C'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+
+    // Gráfico Línea - Tendencia
+    new Chart(document.getElementById('chartTendencia'), {
+        type: 'line',
+        data: {
+            labels: tendenciaLabels,
+            datasets: [
+                {
+                    label: 'Creados',
+                    data: tendenciaCreados,
+                    borderColor: '#0D47A1',
+                    backgroundColor: 'rgba(13, 71, 161, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Cerrados',
+                    data: tendenciaCerrados,
+                    borderColor: '#1B5E20',
+                    backgroundColor: 'rgba(27, 94, 32, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true } }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+</script>
+}

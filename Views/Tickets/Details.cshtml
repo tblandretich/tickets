@@ -1,0 +1,441 @@
+@model TicketsAndretich.Web.Models.Ticket
+@{
+    ViewData["Title"] = $"Ticket #{Model.Id}";
+    var departments = ViewBag.Departments as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+    var users = ViewBag.Users as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+    var estadoCerrado = Model.Estado == TicketsAndretich.Web.Models.EstadoTicket.Cerrado;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Ticket #@Model.Id</h2>
+    <span class="badge fs-6 @GetEstadoBadgeClass(Model.Estado)">@GetEstadoLabel(Model.Estado)</span>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Información del ticket -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between">
+                <strong>@Model.Asunto</strong>
+                <span class="badge @GetImportanciaBadgeClass(Model.Importancia)">@Model.Importancia</span>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Creado por</dt>
+                    <dd class="col-sm-8"><strong>@Model.Creator?.Email</strong></dd>
+                    
+                    <dt class="col-sm-4">Departamento</dt>
+                    <dd class="col-sm-8">@Model.DepartamentoDestino?.Name</dd>
+                    
+                    <dt class="col-sm-4">Asignado a</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.AsignadoA != null)
+                        {
+                            <span class="text-primary fw-bold">@Model.AsignadoA.Email</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin asignar</span>
+                        }
+                    </dd>
+                    
+                    <dt class="col-sm-4">Categoría</dt>
+                    <dd class="col-sm-8">@Model.Categoria</dd>
+                    
+                    <dt class="col-sm-4">Fecha creación</dt>
+                    <dd class="col-sm-8">@Model.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                    
+                    @if (Model.FechaInicioTratamiento.HasValue)
+                    {
+                        <dt class="col-sm-4">Inicio tratamiento</dt>
+                        <dd class="col-sm-8">
+                            <span class="text-info">@Model.FechaInicioTratamiento.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                            @if (Model.TiempoEstimadoHoras.HasValue)
+                            {
+                                <small class="text-muted ms-2">(Estimado: @Model.TiempoEstimadoHoras h)</small>
+                            }
+                        </dd>
+                    }
+                    
+                    @if (Model.FechaCierre.HasValue)
+                    {
+                        <dt class="col-sm-4">Fecha cierre</dt>
+                        <dd class="col-sm-8">@Model.FechaCierre.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                    }
+                    
+                    @if (Model.UltimaAccionPor != null)
+                    {
+                        <dt class="col-sm-4">Última acción por</dt>
+                        <dd class="col-sm-8"><em>@Model.UltimaAccionPor.Email</em></dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="card mb-4">
+            <div class="card-header">Descripción</div>
+            <div class="card-body">
+                <p class="mb-0">@Model.Descripcion</p>
+            </div>
+        </div>
+
+        <!-- Justificaciones (si existen) -->
+        @if (!string.IsNullOrEmpty(Model.JustificacionReasignacion) || !string.IsNullOrEmpty(Model.JustificacionCancelacion))
+        {
+            <div class="card mb-4">
+                <div class="card-header">📝 Historial de Justificaciones</div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.JustificacionReasignacion))
+                    {
+                        <div class="alert alert-warning mb-2">
+                            <strong>Reasignación:</strong> @Model.JustificacionReasignacion
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.JustificacionCancelacion))
+                    {
+                        <div class="alert alert-danger mb-0">
+                            <strong>Cancelación:</strong> @Model.JustificacionCancelacion
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Adjuntos -->
+        @if (Model.Adjuntos?.Any() == true)
+        {
+            <div class="card mb-4">
+                <div class="card-header">📎 Adjuntos (@Model.Adjuntos.Count)</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var a in Model.Adjuntos)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @a.FileName
+                            <span class="badge bg-secondary">@(a.SizeBytes / 1024) KB</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- Barra de Progreso del Estado -->
+        <div class="card mb-4">
+            <div class="card-header">📊 Estado del Ticket</div>
+            <div class="card-body">
+                <div class="progress-tracker d-flex justify-content-between align-items-center position-relative" style="padding:0 30px;">
+                    @{
+                        var estados = new[] { 
+                            (TicketsAndretich.Web.Models.EstadoTicket.Abierto, "✨", "Abierto", "#10B981", "#D1FAE5"),
+                            (TicketsAndretich.Web.Models.EstadoTicket.Pendiente, "⏳", "Pendiente", "#F59E0B", "#FEF3C7"),
+                            (TicketsAndretich.Web.Models.EstadoTicket.EnProgreso, "🚀", "En Progreso", "#6366F1", "#E0E7FF"),
+                            (TicketsAndretich.Web.Models.EstadoTicket.Cerrado, "✅", "Cerrado", "#059669", "#A7F3D0")
+                        };
+                        var estadoActualIndex = Array.FindIndex(estados, e => e.Item1 == Model.Estado);
+                        var progressPercent = estadoActualIndex >= 0 ? (estadoActualIndex * 100 / (estados.Length - 1)) : 0;
+                    }
+                    
+                    <!-- Línea de conexión con gradiente dinámico -->
+                    <div style="position:absolute;top:50%;left:50px;right:50px;height:6px;background:#E5E7EB;transform:translateY(-50%);z-index:0;border-radius:3px;">
+                        <div style="width:@(progressPercent)%;height:100%;background:linear-gradient(90deg, #10B981, #6366F1);border-radius:3px;transition:width 0.5s ease;"></div>
+                    </div>
+                    
+                    @for (int i = 0; i < estados.Length; i++)
+                    {
+                        var (estado, icon, label, color, lightColor) = estados[i];
+                        var isActive = Model.Estado == estado;
+                        var isPassed = i < estadoActualIndex;
+                        var isFuture = i > estadoActualIndex;
+                        var pulseClass = isActive && Model.Estado != TicketsAndretich.Web.Models.EstadoTicket.Cerrado ? "pulse-animation" : "";
+                        
+                        var bgColor = isPassed || isActive ? color : "#E5E7EB";
+                        var textOpacity = isFuture ? "0.5" : "1";
+                        
+                        <div class="text-center position-relative" style="z-index:1;">
+                            <div class="@pulseClass" style="width:56px;height:56px;border-radius:50%;background:@bgColor;display:flex;align-items:center;justify-content:center;font-size:24px;border:4px solid white;box-shadow:@(isActive ? "0 0 0 4px " + color + ", 0 4px 12px rgba(99, 102, 241, 0.4)" : "0 2px 8px rgba(0,0,0,0.1)");">
+                                @icon
+                            </div>
+                            <small class="d-block mt-2 @(isActive ? "fw-bold" : "")" style="opacity:@textOpacity;color:@(isActive ? color : "#374151");font-size:12px;">@label</small>
+                            @if (isActive && Model.Estado != TicketsAndretich.Web.Models.EstadoTicket.Cerrado)
+                            {
+                                <span class="badge" style="background:@color;font-size:9px;position:absolute;top:-8px;left:50%;transform:translateX(-50%);">ACTUAL</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Línea de Tiempo / Historial -->
+        @if (Model.Historial?.Any() == true)
+        {
+            <div class="card mb-4">
+                <div class="card-header">📋 Línea de Tiempo</div>
+                <div class="card-body p-0">
+                    <div class="timeline-container" style="padding: 20px;">
+                        @foreach (var evento in Model.Historial.OrderByDescending(h => h.Fecha))
+                        {
+                            <div class="timeline-item d-flex mb-3">
+                                <div class="timeline-icon me-3 text-center" style="min-width: 40px;">
+                                    <span class="badge rounded-circle p-2 @GetEventoIconClass(evento.TipoEvento)" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                                        @GetEventoIcon(evento.TipoEvento)
+                                    </span>
+                                </div>
+                                <div class="timeline-content flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong class="@GetEventoTextClass(evento.TipoEvento)">@GetEventoTitulo(evento.TipoEvento)</strong>
+                                            <p class="mb-1 text-muted small">@evento.Descripcion</p>
+                                            @if (!string.IsNullOrEmpty(evento.Detalle))
+                                            {
+                                                <p class="mb-0 small fst-italic" style="background:#f5f5f5;padding:8px;border-radius:4px;border-left:3px solid #ccc;">
+                                                    @evento.Detalle
+                                                </p>
+                                            }
+                                        </div>
+                                        <small class="text-muted text-nowrap ms-2">
+                                            @evento.Fecha.ToLocalTime().ToString("dd/MM/yy HH:mm")
+                                        </small>
+                                    </div>
+                                    @if (evento.EstadoAnterior.HasValue && evento.EstadoNuevo.HasValue)
+                                    {
+                                        <div class="mt-1">
+                                            <small class="badge bg-secondary">@evento.EstadoAnterior</small>
+                                            <small class="text-muted">→</small>
+                                            <small class="badge @GetEstadoBadgeClass(evento.EstadoNuevo.Value)">@evento.EstadoNuevo</small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <hr class="my-2" style="border-style:dashed;opacity:0.3;">
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Panel de acciones -->
+    <div class="col-lg-4">
+        @if (!estadoCerrado)
+        {
+            <!-- Cambiar Estado -->
+            <div class="card mb-3">
+                <div class="card-header">🔄 Cambiar Estado</div>
+                <div class="card-body">
+                    <form asp-action="CambiarEstado" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="mb-3">
+                            <select name="nuevoEstado" class="form-select" id="selectEstado" onchange="toggleTiempoEstimado()">
+                                <option value="@TicketsAndretich.Web.Models.EstadoTicket.Abierto">🟢 Abierto</option>
+                                <option value="@TicketsAndretich.Web.Models.EstadoTicket.Pendiente">🟠 Pendiente</option>
+                                <option value="@TicketsAndretich.Web.Models.EstadoTicket.EnProgreso" selected>🔵 En Progreso</option>
+                                <option value="@TicketsAndretich.Web.Models.EstadoTicket.Cerrado">⚫ Cerrado/Resuelto</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="tiempoEstimadoDiv" style="display:none;">
+                            <label class="form-label small">Tiempo estimado (horas)</label>
+                            <input type="number" name="tiempoEstimadoHoras" class="form-control form-control-sm" min="1" placeholder="Ej: 24" />
+                        </div>
+                        <div class="mb-3">
+                            <textarea name="comentario" class="form-control" rows="2" placeholder="Comentario (opcional)"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Actualizar Estado</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reasignar -->
+            <div class="card mb-3">
+                <div class="card-header">👤 Reasignar</div>
+                <div class="card-body">
+                    <form asp-action="Reasignar" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label class="form-label small">Asignar a usuario</label>
+                            <select name="nuevoAsignadoId" class="form-select form-select-sm">
+                                <option value="">-- Seleccionar usuario --</option>
+                                @if (users != null)
+                                {
+                                    @foreach (var u in users)
+                                    {
+                                        <option value="@u.Value">@u.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small">O cambiar departamento</label>
+                            <select name="nuevoDepartamentoId" class="form-select form-select-sm">
+                                <option value="">-- Mantener actual --</option>
+                                @if (departments != null)
+                                {
+                                    @foreach (var d in departments)
+                                    {
+                                        <option value="@d.Value">@d.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-danger">Justificación *</label>
+                            <textarea name="justificacion" class="form-control form-control-sm" rows="2" placeholder="¿Por qué reasigna este ticket?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-warning w-100">Reasignar</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cancelar -->
+            <div class="card mb-3">
+                <div class="card-header text-danger">❌ Cancelar Ticket</div>
+                <div class="card-body">
+                    <form asp-action="Cancelar" method="post" onsubmit="return confirm('¿Estás seguro de cancelar este ticket?');">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label class="form-label small text-danger">Justificación obligatoria *</label>
+                            <textarea name="justificacion" class="form-control" rows="2" placeholder="Motivo de cancelación" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-danger w-100">Cancelar Ticket</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Eliminar (Solo Admin) -->
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="card mb-3 border-danger">
+                    <div class="card-header bg-danger text-white">🗑️ Eliminar Ticket (Admin)</div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-2">⚠️ Esta acción es irreversible. Se eliminará el ticket, su historial y adjuntos.</p>
+                        <form asp-action="Eliminar" method="post" onsubmit="return confirm('⚠️ ATENCIÓN: Esta acción eliminará permanentemente el ticket #@Model.Id y todos sus datos asociados. ¿Estás seguro?');">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="bi bi-trash"></i> Eliminar Permanentemente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-secondary">
+                <strong>Ticket cerrado</strong><br>
+                <small>Este ticket fue cerrado el @Model.FechaCierre?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                @if (!string.IsNullOrEmpty(Model.JustificacionCancelacion))
+                {
+                    <hr>
+                    <small><strong>Motivo:</strong> @Model.JustificacionCancelacion</small>
+                }
+            </div>
+            
+            <!-- Eliminar para tickets cerrados (Solo Admin) -->
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="card mb-3 border-danger mt-3">
+                    <div class="card-header bg-danger text-white">🗑️ Eliminar Ticket (Admin)</div>
+                    <div class="card-body">
+                        <form asp-action="Eliminar" method="post" onsubmit="return confirm('⚠️ ATENCIÓN: Esta acción eliminará permanentemente el ticket #@Model.Id. ¿Estás seguro?');">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger w-100">Eliminar Permanentemente</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-outline-secondary">← Volver a la lista</a>
+</div>
+
+@section Scripts {
+<script>
+function toggleTiempoEstimado() {
+    var select = document.getElementById('selectEstado');
+    var div = document.getElementById('tiempoEstimadoDiv');
+    // EnProgreso = 2
+    div.style.display = select.value === '2' ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', toggleTiempoEstimado);
+</script>
+}
+
+@functions {
+    string GetEstadoBadgeClass(TicketsAndretich.Web.Models.EstadoTicket estado) => estado switch
+    {
+        TicketsAndretich.Web.Models.EstadoTicket.Abierto => "bg-success",
+        TicketsAndretich.Web.Models.EstadoTicket.EnProgreso => "bg-primary",
+        TicketsAndretich.Web.Models.EstadoTicket.Pendiente => "bg-warning text-dark",
+        TicketsAndretich.Web.Models.EstadoTicket.Cerrado => "bg-secondary",
+        _ => "bg-secondary"
+    };
+    
+    string GetEstadoLabel(TicketsAndretich.Web.Models.EstadoTicket estado) => estado switch
+    {
+        TicketsAndretich.Web.Models.EstadoTicket.Abierto => "🟢 Abierto",
+        TicketsAndretich.Web.Models.EstadoTicket.EnProgreso => "🔵 En Progreso",
+        TicketsAndretich.Web.Models.EstadoTicket.Pendiente => "🟠 Pendiente",
+        TicketsAndretich.Web.Models.EstadoTicket.Cerrado => "⚫ Cerrado",
+        _ => estado.ToString()
+    };
+
+    string GetImportanciaBadgeClass(TicketsAndretich.Web.Models.Importancia imp) => imp switch
+    {
+        TicketsAndretich.Web.Models.Importancia.Alta => "bg-danger",
+        TicketsAndretich.Web.Models.Importancia.Media => "bg-warning text-dark",
+        TicketsAndretich.Web.Models.Importancia.Baja => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    // Helpers para línea de tiempo
+    string GetEventoIcon(TicketsAndretich.Web.Models.TipoEventoTicket tipo) => tipo switch
+    {
+        TicketsAndretich.Web.Models.TipoEventoTicket.Creado => "🎫",
+        TicketsAndretich.Web.Models.TipoEventoTicket.CambioEstado => "🔄",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Asignado => "👤",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Reasignado => "🔀",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Comentario => "💬",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cancelado => "❌",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cerrado => "✅",
+        _ => "📌"
+    };
+
+    string GetEventoIconClass(TicketsAndretich.Web.Models.TipoEventoTicket tipo) => tipo switch
+    {
+        TicketsAndretich.Web.Models.TipoEventoTicket.Creado => "bg-success",
+        TicketsAndretich.Web.Models.TipoEventoTicket.CambioEstado => "bg-primary",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Asignado => "bg-info",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Reasignado => "bg-warning",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Comentario => "bg-secondary",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cancelado => "bg-danger",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cerrado => "bg-dark",
+        _ => "bg-secondary"
+    };
+
+    string GetEventoTextClass(TicketsAndretich.Web.Models.TipoEventoTicket tipo) => tipo switch
+    {
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cancelado => "text-danger",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cerrado => "text-success",
+        _ => ""
+    };
+
+    string GetEventoTitulo(TicketsAndretich.Web.Models.TipoEventoTicket tipo) => tipo switch
+    {
+        TicketsAndretich.Web.Models.TipoEventoTicket.Creado => "Ticket Creado",
+        TicketsAndretich.Web.Models.TipoEventoTicket.CambioEstado => "Cambio de Estado",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Asignado => "Asignación",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Reasignado => "Reasignación",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Comentario => "Comentario",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cancelado => "Ticket Cancelado",
+        TicketsAndretich.Web.Models.TipoEventoTicket.Cerrado => "Ticket Cerrado",
+        _ => tipo.ToString()
+    };
+}

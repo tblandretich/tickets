@@ -1,0 +1,69 @@
+@model CrearUsuarioViewModel
+@{
+    ViewData["Title"] = "Crear Usuario";
+    var departments = (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Departments;
+    var roles = (IEnumerable<string>)ViewBag.Roles;
+}
+
+<h2>Crear Usuario</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="CrearUsuario" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input asp-for="FirstName" class="form-control" placeholder="Nombre" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apellido</label>
+                            <input asp-for="LastName" class="form-control" placeholder="Apellido" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="correo@ejemplo.com" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Mínimo 8 caracteres" required />
+                        <small class="text-muted">Debe tener al menos 8 caracteres, una mayúscula y un número.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Departamento</label>
+                        <select asp-for="DepartmentId" asp-items="departments" class="form-select">
+                            <option value="">-- Sin departamento --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Rol</label>
+                        <select asp-for="Role" class="form-select">
+                            <option value="">-- Sin rol especial --</option>
+                            @foreach (var r in roles)
+                            {
+                                <option value="@r">@r</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                        <a asp-action="Usuarios" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,30 @@
+@model IEnumerable<TicketsAndretich.Web.Models.Ticket>
+<h2>Tickets</h2>
+<p><a class="btn btn-primary" asp-action="Create">Nuevo ticket</a></p>
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Asunto</th>
+            <th>Departamento</th>
+            <th>Importancia</th>
+            <th>Estado</th>
+            <th>Creado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var t in Model)
+    {
+        <tr>
+            <td>@t.Id</td>
+            <td>@t.Asunto</td>
+            <td>@t.DepartamentoDestino?.Name (@t.DepartamentoDestinoId)</td>
+            <td>@t.Importancia</td>
+            <td>@t.Estado</td>
+            <td>@t.FechaCreacion.LocalDateTime</td>
+            <td><a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@t.Id">Ver</a></td>
+        </tr>
+    }
+    </tbody>
+</table>

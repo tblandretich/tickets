@@ -1,0 +1,32 @@
+@model IEnumerable<TicketsAndretich.Web.Models.Department>
+<h2>Administración de Departamentos</h2>
+<form asp-action="CrearDepartamento" method="post" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="name" class="form-control" placeholder="Nuevo departamento" required />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Crear</button>
+    </div>
+</form>
+<table class="table table-striped">
+    <thead><tr><th>Id</th><th>Nombre</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var d in Model)
+    {
+        <tr>
+            <td>@d.Id</td>
+            <td>@d.Name</td>
+            <td>
+                <form asp-action="EliminarDepartamento" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@d.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar @d.Name?')">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+    }
+</tbody>
+</table>
+<div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" asp-action="Usuarios">👥 Administrar usuarios</a>
+    <a class="btn btn-outline-secondary" asp-action="ConfiguracionEmail">📧 Configuración de Email</a>
+</div>

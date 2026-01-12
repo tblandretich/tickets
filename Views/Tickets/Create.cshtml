@@ -1,0 +1,48 @@
+@model TicketsAndretich.Web.Controllers.TicketCreateVm
+@{
+    ViewData["Title"] = "Crear Ticket";
+}
+<h2>Crear Ticket</h2>
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Asunto" class="form-label"></label>
+        <input asp-for="Asunto" class="form-control" required maxlength="200" />
+        <span asp-validation-for="Asunto" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DepartamentoDestinoId" class="form-label">Departamento destino</label>
+        <select asp-for="DepartamentoDestinoId" class="form-select" asp-items="ViewBag.Departments"></select>
+    </div>
+    <div class="form-check form-switch mb-3">
+        <input asp-for="EnviarATodoElDepartamento" class="form-check-input" />
+        <label class="form-check-label" asp-for="EnviarATodoElDepartamento">Enviar a todo el departamento</label>
+    </div>
+    <div class="mb-3">
+        <label asp-for="AsignadoUserId" class="form-label">O asignar a un usuario específico</label>
+        <select asp-for="AsignadoUserId" class="form-select" asp-items="ViewBag.Users">
+            <option value="">-- Ninguno --</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Importancia" class="form-label"></label>
+        <select asp-for="Importancia" class="form-select" asp-items="Html.GetEnumSelectList<Importancia>()"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Categoria" class="form-label"></label>
+        <select asp-for="Categoria" class="form-select" asp-items="Html.GetEnumSelectList<Categoria>()"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Descripcion" class="form-label"></label>
+        <textarea asp-for="Descripcion" class="form-control" rows="5" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Adjuntos (máx. 3 archivos)</label>
+        <input type="file" name="archivos" class="form-control" multiple />
+        <small class="text-muted">Imágenes, PDF u otros. (Se guardan localmente en App_Data/uploads)</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

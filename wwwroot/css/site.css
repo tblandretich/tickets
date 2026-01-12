@@ -1,0 +1,165 @@
+/* Fondo SIEMPRE blanco */
+html,
+body {
+    background-color: #ffffff !important;
+}
+
+body {
+    min-height: 100vh;
+}
+
+/* Botones SIEMPRE rojos */
+.btn-primary {
+    background-color: #C62828 !important;
+    border-color: #C62828 !important;
+}
+
+a.btn-primary:hover,
+.btn-primary:hover {
+    filter: brightness(0.95);
+}
+
+/* Links y acentos pueden variar por tema futuro (no incluido en MVP) */
+.navbar .nav-link.active,
+.navbar .nav-link:hover {
+    text-decoration: underline;
+}
+
+/* =========== DASHBOARD STYLES =========== */
+
+/* Tarjetas de estadísticas */
+.stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #e0e0e0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #444;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #222;
+}
+
+/* Colores OSCUROS por tipo de tarjeta */
+.stat-nuevos {
+    border-left-color: #1B5E20;
+}
+
+.stat-nuevos .stat-value {
+    color: #1B5E20;
+}
+
+.stat-proceso {
+    border-left-color: #0D47A1;
+}
+
+.stat-proceso .stat-value {
+    color: #0D47A1;
+}
+
+.stat-espera {
+    border-left-color: #E65100;
+}
+
+.stat-espera .stat-value {
+    color: #E65100;
+}
+
+.stat-cerrados {
+    border-left-color: #424242;
+}
+
+.stat-cerrados .stat-value {
+    color: #424242;
+}
+
+.stat-criticos {
+    border-left-color: #B71C1C;
+}
+
+.stat-criticos .stat-value {
+    color: #B71C1C;
+}
+
+.stat-tiempo {
+    border-left-color: #4A148C;
+}
+
+.stat-tiempo .stat-value {
+    color: #4A148C;
+}
+
+/* Contenedores de gráficos */
+.chart-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: 100%;
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.chart-container {
+    position: relative;
+    height: 280px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .chart-container {
+        height: 220px;
+    }
+}
+
+/* Animación de pulso para estado actual del ticket */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7), 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 12px rgba(99, 102, 241, 0), 0 6px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+}
+
+.pulse-animation {
+    animation: pulse 1.5s infinite ease-in-out;
+}

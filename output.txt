@@ -1,0 +1,20 @@
+﻿Versión de MSBuild 17.9.8+610b4d3b5 para .NET
+  Determining projects to restore...
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'Microsoft.AspNetCore.Identity.EntityFrameworkCore (>= 8.0.7)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'Microsoft.AspNetCore.Identity.UI (>= 8.0.7)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'MailKit (>= 4.7.1)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'Microsoft.SqlServer.Server (>= 1.0.0)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'System.Security.Permissions (>= 6.0.0)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+  No se pudo restaurar C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj (en 281 ms).
+
+ERROR al compilar.
+
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'Microsoft.AspNetCore.Identity.EntityFrameworkCore (>= 8.0.7)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'Microsoft.AspNetCore.Identity.UI (>= 8.0.7)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'MailKit (>= 4.7.1)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'Microsoft.SqlServer.Server (>= 1.0.0)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+C:\Users\Lucas\Desktop\Ticket\Local\TicketsAndretich.Web\TicketsAndretich.Web.csproj : error NU1100: No se puede resolver 'System.Security.Permissions (>= 6.0.0)' para 'net8.0'. PackageSourceMapping está habilitado. No se tuvieron en cuenta los siguientes orígenes: Microsoft Visual Studio Offline Packages, nuget.org.
+    0 Advertencia(s)
+    5 Errores
+
+Tiempo transcurrido 00:00:00.74
