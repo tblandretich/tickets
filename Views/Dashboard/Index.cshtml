@@ -2,8 +2,10 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Dashboard</h2>
+<div class="d-flex align-items-center justify-content-center mb-4">
+    <div style="flex: 1; height: 2px; background: linear-gradient(90deg, transparent, #ccc);"></div>
+    <h2 class="mb-0 mx-4" style="text-transform: uppercase; letter-spacing: 3px; font-weight: 700; color: #333;">Dashboard</h2>
+    <div style="flex: 1; height: 2px; background: linear-gradient(90deg, #ccc, transparent);"></div>
 </div>
 
 <!-- Tarjetas de estadísticas -->
@@ -80,6 +82,45 @@
             <h5 class="chart-title">Tendencia (Últimos 12 días)</h5>
             <div class="chart-container">
                 <canvas id="chartTendencia"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nube de Palabras - Top Creadores de Tickets -->
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="chart-card">
+            <h5 class="chart-title">👤 Usuarios que más crean tickets</h5>
+            <div id="wordCloud" style="min-height: 200px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px; padding: 20px;">
+                @{
+                    var names = ViewBag.CreadorNames as string[] ?? new string[0];
+                    var counts = ViewBag.CreadorCounts as int[] ?? new int[0];
+                    var maxCount = counts.Length > 0 ? counts.Max() : 1;
+                    // Paleta de 15 colores distintos para cada usuario
+                    var colors = new[] { 
+                        "#C62828", "#1565C0", "#2E7D32", "#F57C00", "#7B1FA2", 
+                        "#00838F", "#D84315", "#5E35B1", "#1976D2", "#388E3C",
+                        "#E64A19", "#512DA8", "#0097A7", "#F9A825", "#AD1457"
+                    };
+                    
+                    for (int i = 0; i < names.Length; i++)
+                    {
+                        var ratio = (double)counts[i] / maxCount;
+                        var fontSize = 14 + (int)(ratio * 24); // 14px a 38px
+                        var fontWeight = ratio > 0.5 ? "700" : (ratio > 0.3 ? "600" : "500");
+                        var color = colors[i % colors.Length];
+                        var opacity = 0.6 + (ratio * 0.4);
+                        <span style="font-size: @(fontSize)px; font-weight: @fontWeight; color: @color; opacity: @opacity; padding: 5px 10px; transition: all 0.3s ease; cursor: default;" 
+                              title="@counts[i] tickets creados">
+                            @names[i]
+                        </span>
+                    }
+                }
+                @if (names.Length == 0)
+                {
+                    <span class="text-muted">No hay datos suficientes</span>
+                }
             </div>
         </div>
     </div>

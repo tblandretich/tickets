@@ -1,0 +1,290 @@
+@model TicketsAndretich.Web.Controllers.ThemePreferences
+@{
+    ViewData["Title"] = "Personalización";
+}
+
+<div class="d-flex align-items-center justify-content-center mb-4">
+    <div style="flex: 1; height: 2px; background: linear-gradient(90deg, transparent, #ccc);"></div>
+    <h2 class="mb-0 mx-4" style="text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">🎨 PERSONALIZACIÓN</h2>
+    <div style="flex: 1; height: 2px; background: linear-gradient(90deg, #ccc, transparent);"></div>
+</div>
+
+<!-- Temas Predefinidos -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">✨ Temas Recomendados</h5>
+        <small class="text-muted">Selecciona un tema con combinaciones de colores armoniosas</small>
+    </div>
+    <div class="card-body">
+        <div class="row g-3" id="temasGrid">
+            <!-- Tema Clásico Rojo -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('clasico')" data-theme="clasico">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #ffffff;"><span style="color: #C62828;">Navbar</span></div>
+                        <div class="theme-content" style="background: #f5f5f5;">
+                            <button style="background: #C62828;">Btn</button>
+                            <button style="background: #1565C0;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🔴 Clásico Rojo</div>
+                    <div class="theme-desc">Profesional y elegante</div>
+                </div>
+            </div>
+            
+            <!-- Tema Océano Azul -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('oceano')" data-theme="oceano">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #1565C0;"><span style="color: #fff;">Navbar</span></div>
+                        <div class="theme-content" style="background: #E3F2FD;">
+                            <button style="background: #1565C0;">Btn</button>
+                            <button style="background: #0D47A1;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🔵 Océano Azul</div>
+                    <div class="theme-desc">Fresco y moderno</div>
+                </div>
+            </div>
+            
+            <!-- Tema Bosque Verde -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('bosque')" data-theme="bosque">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #2E7D32;"><span style="color: #fff;">Navbar</span></div>
+                        <div class="theme-content" style="background: #E8F5E9;">
+                            <button style="background: #2E7D32;">Btn</button>
+                            <button style="background: #1B5E20;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🟢 Bosque Verde</div>
+                    <div class="theme-desc">Natural y tranquilo</div>
+                </div>
+            </div>
+            
+            <!-- Tema Atardecer -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('atardecer')" data-theme="atardecer">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #E65100;"><span style="color: #fff;">Navbar</span></div>
+                        <div class="theme-content" style="background: #FFF3E0;">
+                            <button style="background: #E65100;">Btn</button>
+                            <button style="background: #BF360C;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🟠 Atardecer</div>
+                    <div class="theme-desc">Cálido y acogedor</div>
+                </div>
+            </div>
+            
+            <!-- Tema Púrpura Real -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('purpura')" data-theme="purpura">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #6A1B9A;"><span style="color: #fff;">Navbar</span></div>
+                        <div class="theme-content" style="background: #F3E5F5;">
+                            <button style="background: #6A1B9A;">Btn</button>
+                            <button style="background: #4A148C;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🟣 Púrpura Real</div>
+                    <div class="theme-desc">Elegante y sofisticado</div>
+                </div>
+            </div>
+            
+            <!-- Tema Noche Oscura -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('noche')" data-theme="noche">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #1a1a2e;"><span style="color: #E0E0E0;">Navbar</span></div>
+                        <div class="theme-content" style="background: #16213e;">
+                            <button style="background: #0F3460;">Btn</button>
+                            <button style="background: #E94560;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🌙 Noche Oscura</div>
+                    <div class="theme-desc">Modo oscuro elegante</div>
+                </div>
+            </div>
+            
+            <!-- Tema Rosa Moderno -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('rosa')" data-theme="rosa">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #AD1457;"><span style="color: #fff;">Navbar</span></div>
+                        <div class="theme-content" style="background: #FCE4EC;">
+                            <button style="background: #AD1457;">Btn</button>
+                            <button style="background: #880E4F;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">🩷 Rosa Moderno</div>
+                    <div class="theme-desc">Vibrante y fresco</div>
+                </div>
+            </div>
+            
+            <!-- Tema Café Dorado -->
+            <div class="col-md-4 col-lg-3">
+                <div class="theme-card" onclick="aplicarTema('cafe')" data-theme="cafe">
+                    <div class="theme-preview">
+                        <div class="theme-navbar" style="background: #5D4037;"><span style="color: #fff;">Navbar</span></div>
+                        <div class="theme-content" style="background: #EFEBE9;">
+                            <button style="background: #5D4037;">Btn</button>
+                            <button style="background: #3E2723;">Btn</button>
+                        </div>
+                    </div>
+                    <div class="theme-name">☕ Café Dorado</div>
+                    <div class="theme-desc">Clásico y cálido</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuración Manual -->
+<div class="card">
+    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#configManual" style="cursor: pointer;">
+        <h5 class="mb-0">⚙️ Configuración Avanzada <small class="text-muted">(Click para expandir)</small></h5>
+    </div>
+    <div class="collapse" id="configManual">
+        <div class="card-body">
+            <form asp-action="Guardar" method="post" id="formPersonalizacion">
+                <input type="hidden" name="Tema" id="TemaInput" value="@Model.Tema">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="ColorPrimario" class="form-label fw-bold">Color Primario</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" id="ColorPrimario" name="ColorPrimario" value="@Model.ColorPrimario" style="width:60px;">
+                            <input type="text" class="form-control" id="ColorPrimarioText" value="@Model.ColorPrimario" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ColorSecundario" class="form-label fw-bold">Color Secundario</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" id="ColorSecundario" name="ColorSecundario" value="@Model.ColorSecundario" style="width:60px;">
+                            <input type="text" class="form-control" id="ColorSecundarioText" value="@Model.ColorSecundario" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ColorFondo" class="form-label fw-bold">Color de Fondo</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" id="ColorFondo" name="ColorFondo" value="@Model.ColorFondo" style="width:60px;">
+                            <input type="text" class="form-control" id="ColorFondoText" value="@Model.ColorFondo" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ColorNavbar" class="form-label fw-bold">Color del Navbar</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" id="ColorNavbar" name="ColorNavbar" value="@Model.ColorNavbar" style="width:60px;">
+                            <input type="text" class="form-control" id="ColorNavbarText" value="@Model.ColorNavbar" readonly>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Redondez de Bordes: <span id="radiusValue">@Model.BorderRadius</span>px</label>
+                        <input type="range" class="form-range" id="BorderRadius" name="BorderRadius" min="0" max="20" value="@Model.BorderRadius">
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
+                    <a asp-action="Restablecer" class="btn btn-outline-secondary" onclick="event.preventDefault(); if(confirm('¿Restablecer?')) { var f=document.createElement('form'); f.method='POST'; f.action=this.href; document.body.appendChild(f); f.submit(); }">🔄 Restablecer</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .theme-card {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    .theme-card:hover {
+        border-color: var(--color-primary, #C62828);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .theme-card.selected {
+        border-color: var(--color-primary, #C62828);
+        box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.2);
+    }
+    .theme-preview {
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+    .theme-navbar {
+        padding: 8px 10px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .theme-content {
+        padding: 12px;
+        display: flex;
+        gap: 6px;
+    }
+    .theme-content button {
+        border: none;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 10px;
+    }
+    .theme-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .theme-desc {
+        font-size: 0.75rem;
+        color: #666;
+    }
+</style>
+
+@section Scripts {
+<script>
+    const temas = {
+        clasico: { primario: '#C62828', secundario: '#1565C0', fondo: '#f5f5f5', navbar: '#ffffff', tema: 'claro' },
+        oceano: { primario: '#1565C0', secundario: '#0D47A1', fondo: '#E3F2FD', navbar: '#1565C0', tema: 'claro' },
+        bosque: { primario: '#2E7D32', secundario: '#1B5E20', fondo: '#E8F5E9', navbar: '#2E7D32', tema: 'claro' },
+        atardecer: { primario: '#E65100', secundario: '#BF360C', fondo: '#FFF3E0', navbar: '#E65100', tema: 'claro' },
+        purpura: { primario: '#6A1B9A', secundario: '#4A148C', fondo: '#F3E5F5', navbar: '#6A1B9A', tema: 'claro' },
+        noche: { primario: '#0F3460', secundario: '#E94560', fondo: '#16213e', navbar: '#1a1a2e', tema: 'oscuro' },
+        rosa: { primario: '#AD1457', secundario: '#880E4F', fondo: '#FCE4EC', navbar: '#AD1457', tema: 'claro' },
+        cafe: { primario: '#5D4037', secundario: '#3E2723', fondo: '#EFEBE9', navbar: '#5D4037', tema: 'claro' }
+    };
+
+    function aplicarTema(nombre) {
+        const tema = temas[nombre];
+        document.getElementById('ColorPrimario').value = tema.primario;
+        document.getElementById('ColorPrimarioText').value = tema.primario;
+        document.getElementById('ColorSecundario').value = tema.secundario;
+        document.getElementById('ColorSecundarioText').value = tema.secundario;
+        document.getElementById('ColorFondo').value = tema.fondo;
+        document.getElementById('ColorFondoText').value = tema.fondo;
+        document.getElementById('ColorNavbar').value = tema.navbar;
+        document.getElementById('ColorNavbarText').value = tema.navbar;
+        document.getElementById('TemaInput').value = tema.tema;
+        
+        // Marcar seleccionado
+        document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+        document.querySelector(`[data-theme="${nombre}"]`).classList.add('selected');
+        
+        // Guardar automáticamente
+        document.getElementById('formPersonalizacion').submit();
+    }
+
+    // Sincronizar color pickers
+    document.querySelectorAll('input[type="color"]').forEach(picker => {
+        picker.addEventListener('input', e => {
+            document.getElementById(e.target.id + 'Text').value = e.target.value;
+        });
+    });
+
+    document.getElementById('BorderRadius')?.addEventListener('input', e => {
+        document.getElementById('radiusValue').textContent = e.target.value;
+    });
+</script>
+}

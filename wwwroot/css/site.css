@@ -32,14 +32,20 @@ body {
 .navbar .nav-link {
     color: var(--color-text-dark) !important;
     font-weight: 500;
-    padding: 8px 16px !important;
-    border-radius: 8px;
+    padding: 8px 18px !important;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+    background: rgba(255, 255, 255, 0.8);
     transition: all 0.2s ease;
 }
 
 .navbar .nav-link:hover {
-    background: rgba(139, 115, 85, 0.1);
-    color: var(--color-primary) !important;
+    background: var(--color-primary);
+    color: #fff !important;
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Botones primarios - marron dorado */

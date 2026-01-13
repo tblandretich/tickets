@@ -70,6 +70,18 @@ public class DashboardController : Controller
         ViewBag.TendenciaCreados = tendenciaCreados;
         ViewBag.TendenciaCerrados = tendenciaCerrados;
 
+        // Datos para nube de palabras - usuarios que más crean tickets
+        var topCreadores = await _db.Tickets
+            .Where(t => t.Creator != null)
+            .GroupBy(t => t.Creator!.Email)
+            .Select(g => new { Email = g.Key, Count = g.Count() })
+            .OrderByDescending(x => x.Count)
+            .Take(15)
+            .ToListAsync();
+
+        ViewBag.CreadorNames = topCreadores.Select(x => x.Email!.Split('@')[0]).ToArray();
+        ViewBag.CreadorCounts = topCreadores.Select(x => x.Count).ToArray();
+
         return View();
     }
 }
