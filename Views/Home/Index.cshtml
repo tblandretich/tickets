@@ -112,32 +112,19 @@
                 Gestione solicitudes, realice seguimiento de tareas y colabore eficientemente 
                 con su equipo de trabajo.
             </p>
-            <div class="feature-list">
-                <div class="feature-item">
+            <div class="feature-list" style="justify-content: center;">
+                <a href="/Tickets" class="feature-item" style="text-decoration:none;color:inherit;">
                     <span class="feature-icon">📋</span>
                     <span>Gestión de Tickets</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">🔔</span>
-                    <span>Notificaciones</span>
-                </div>
-                <div class="feature-item">
+                </a>
+                <a href="/Dashboard" class="feature-item" style="text-decoration:none;color:inherit;">
                     <span class="feature-icon">📊</span>
                     <span>Dashboard</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">👥</span>
-                    <span>Colaboración</span>
-                </div>
+                </a>
             </div>
-            @if (User.Identity?.IsAuthenticated == true)
+            @if (User.Identity?.IsAuthenticated != true)
             {
-                <a asp-controller="Tickets" asp-action="Index" class="btn-hero">Ver Tickets</a>
-                <a asp-controller="Tickets" asp-action="Create" class="btn-secondary-hero">Crear Ticket</a>
-            }
-            else
-            {
-                <a asp-area="Identity" asp-page="/Account/Login" class="btn-hero">Ingresar</a>
+                <a href="/Identity/Account/Login" class="btn-hero">Ingresar</a>
             }
         </div>
     </div>

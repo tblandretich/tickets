@@ -1,28 +1,129 @@
-/* Fondo SIEMPRE blanco */
+/* =========== VARIABLES DE COLORES =========== */
+:root {
+    --color-primary: #C62828;
+    --color-primary-dark: #B71C1C;
+    --color-primary-light: #E53935;
+    --color-accent: #C62828;
+    --color-bg-light: #f8f9fa;
+    --color-bg-cream: #fdf9f9;
+    --color-text-dark: #333;
+    --color-border: #f0e8e8;
+}
+
+/* =========== BASE STYLES =========== */
 html,
 body {
-    background-color: #ffffff !important;
-}
-
-body {
+    background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 50%, #f8f6f6 100%) !important;
     min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* Botones SIEMPRE rojos */
-.btn-primary {
-    background-color: #C62828 !important;
-    border-color: #C62828 !important;
+/* Navbar mejorado */
+.navbar {
+    background: linear-gradient(180deg, #ffffff 0%, #f9f7f7 100%) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid #ebe7e7 !important;
 }
 
-a.btn-primary:hover,
-.btn-primary:hover {
-    filter: brightness(0.95);
+.navbar-brand {
+    color: var(--color-primary) !important;
 }
 
-/* Links y acentos pueden variar por tema futuro (no incluido en MVP) */
-.navbar .nav-link.active,
+.navbar .nav-link {
+    color: var(--color-text-dark) !important;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
 .navbar .nav-link:hover {
-    text-decoration: underline;
+    background: rgba(139, 115, 85, 0.1);
+    color: var(--color-primary) !important;
+}
+
+/* Botones primarios - marron dorado */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important;
+    border: none !important;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(139, 115, 85, 0.35);
+    filter: brightness(1.05);
+}
+
+/* Botones danger mantienen rojo */
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    border: none !important;
+    border-radius: 8px;
+}
+
+/* Cards mejoradas */
+.card {
+    border: 1px solid var(--color-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid var(--color-border) !important;
+    font-weight: 600;
+}
+
+/* Tablas mejoradas */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: linear-gradient(180deg, var(--color-bg-cream) 0%, #f0ebe5 100%) !important;
+    border-bottom: 2px solid var(--color-border) !important;
+    color: var(--color-text-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(139, 115, 85, 0.05) !important;
+}
+
+/* Container principal */
+.container,
+.container-fluid {
+    padding-top: 1rem;
+}
+
+/* Form controls mejorados */
+.form-control,
+.form-select {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.15);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
 }
 
 /* =========== DASHBOARD STYLES =========== */
