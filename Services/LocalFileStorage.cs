@@ -14,24 +14,50 @@ public class LocalFileStorage : IFileStorage
         var safeName = string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
         var folder = Path.Combine(_root, relativeFolder);
         Directory.CreateDirectory(folder);
-        var path = Path.Combine(folder, $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{safeName}");
+        
+        // Generar nombre único con timestamp
+        var uniqueFileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{safeName}";
+        var fullPath = Path.Combine(folder, uniqueFileName);
 
-        using (var fs = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        using (var fs = new FileStream(fullPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         {
             await stream.CopyToAsync(fs, ct);
         }
-        return path;
+        
+        // Guardar ruta RELATIVA (desde la carpeta uploads)
+        return Path.Combine(relativeFolder, uniqueFileName);
     }
 
-    public Task<Stream> OpenReadAsync(string storagePath, CancellationToken ct = default)
+    public Task<Stream?> OpenReadAsync(string storagePath, CancellationToken ct = default)
     {
-        Stream s = File.OpenRead(storagePath);
-        return Task.FromResult(s);
+        // Si la ruta es absoluta (legado), usarla directamente
+        // Si es relativa, resolver desde _root
+        string fullPath;
+        if (Path.IsPathRooted(storagePath))
+        {
+            fullPath = storagePath;
+        }
+        else
+        {
+            fullPath = Path.Combine(_root, storagePath);
+        }
+        
+        if (!File.Exists(fullPath))
+        {
+            return Task.FromResult<Stream?>(null);
+        }
+        
+        Stream s = File.OpenRead(fullPath);
+        return Task.FromResult<Stream?>(s);
     }
 
     public Task DeleteAsync(string storagePath, CancellationToken ct = default)
     {
-        if (File.Exists(storagePath)) File.Delete(storagePath);
+        string fullPath = Path.IsPathRooted(storagePath) 
+            ? storagePath 
+            : Path.Combine(_root, storagePath);
+            
+        if (File.Exists(fullPath)) File.Delete(fullPath);
         return Task.CompletedTask;
     }
 }
