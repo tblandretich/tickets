@@ -81,7 +81,7 @@
         <div class="card mb-4">
             <div class="card-header">Descripción</div>
             <div class="card-body">
-                <p class="mb-0">@Model.Descripcion</p>
+                <p class="mb-0 descripcion-content" style="white-space: pre-wrap; word-break: break-word;">@Html.Raw(ConvertUrlsToLinks(Model.Descripcion))</p>
             </div>
         </div>
 
@@ -509,6 +509,25 @@ function previewFile(url, contentType, fileName) {
         TicketsAndretich.Web.Models.TipoEventoTicket.Cerrado => "Ticket Cerrado",
         _ => tipo.ToString()
     };
+
+    // Convertir URLs a enlaces clickeables
+    string ConvertUrlsToLinks(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        
+        // Primero escapar HTML para evitar XSS
+        text = System.Net.WebUtility.HtmlEncode(text);
+        
+        // Patrón para detectar URLs (http, https, www)
+        var urlPattern = @"(https?://[^\s<>""]+|www\.[^\s<>""]+)";
+        var regex = new System.Text.RegularExpressions.Regex(urlPattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        return regex.Replace(text, match => {
+            var url = match.Value;
+            var href = url.StartsWith("www.") ? "https://" + url : url;
+            return $"<a href=\"{href}\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-primary\" style=\"word-break: break-all;\">{url}</a>";
+        });
+    }
 }
 
 
